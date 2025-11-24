@@ -109,6 +109,9 @@ export function ProdutoCard({ id, nome, slug, preco, estoque, specs, imagemUrl }
                     <div className="text-2xl font-bold text-primary transition-transform duration-300 group-hover:scale-110 inline-block">
                         {formatPrice(preco)}
                     </div>
+                    <div className="text-xs text-muted-foreground">
+                        cada unidade
+                    </div>
                 </div>
                 <Button
                     size="sm"
