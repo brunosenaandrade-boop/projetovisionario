@@ -11,6 +11,8 @@ import {
   MessageSquare,
 } from 'lucide-react'
 
+import { DashboardHeader } from '@/components/admin/DashboardHeader'
+
 export default async function DashboardPage() {
   // const session = await getSession()
   // if (!session) {
@@ -25,28 +27,28 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-      </div>
+    <div className="flex-1 space-y-8 p-8 pt-6 pb-12 bg-background/50 min-h-screen">
+      <DashboardHeader />
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title="Receita Total"
           value={formatPrice(stats.receita.total)}
-          description={`${formatPrice(stats.receita.mes)} este mes`}
+          description={`${formatPrice(stats.receita.mes)} este mês`}
           icon={DollarSign}
+          trend={{ value: 12, positive: true }}
         />
         <StatsCard
           title="Pedidos"
           value={stats.pedidos.total}
-          description={`${stats.pedidos.hoje} hoje, ${stats.pedidos.mes} este mes`}
+          description={`${stats.pedidos.hoje} hoje`}
           icon={ShoppingCart}
+          trend={{ value: 4, positive: true }}
         />
         <StatsCard
           title="Agendamentos Hoje"
           value={stats.agendamentos.hoje}
-          description="Instalacoes programadas"
+          description="Instalações programadas"
           icon={Calendar}
         />
         <StatsCard
@@ -57,7 +59,7 @@ export default async function DashboardPage() {
         />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+      <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-7">
         <RecentOrders pedidos={pedidosRecentes} />
       </div>
     </div>

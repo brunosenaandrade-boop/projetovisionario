@@ -1,14 +1,36 @@
-import { redirect } from 'next/navigation'
+import { getPedidos } from '@/lib/admin/pedidos'
+import { PedidosClient } from '@/components/admin/pedidos/PedidosClient'
 
-export default function PedidosPage() {
+interface PageProps {
+    searchParams: Promise<{
+        status?: string
+        search?: string
+        page?: string
+    }>
+}
+
+export default async function PedidosPage({ searchParams }: PageProps) {
+    const params = await searchParams
+    const page = Number(params.page) || 1
+    const limit = 10
+
+    const { pedidos, total, pages } = await getPedidos({
+        status: params.status,
+        search: params.search,
+        page,
+        limit,
+    })
+
     return (
         <div className="flex-1 space-y-4 p-8 pt-6">
             <div className="flex items-center justify-between">
                 <h2 className="text-3xl font-bold tracking-tight">Pedidos</h2>
             </div>
-            <div className="p-4 border rounded-lg bg-white">
-                <p className="text-muted-foreground">Funcionalidade de pedidos em desenvolvimento.</p>
-            </div>
+            <PedidosClient
+                initialPedidos={pedidos}
+                total={total}
+                pages={pages}
+            />
         </div>
     )
 }

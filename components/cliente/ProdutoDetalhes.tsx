@@ -42,7 +42,7 @@ export function ProdutoDetalhes({ produto }: ProdutoDetalhesProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Imagem/Visualização */}
             <div>
-                <div className="aspect-square bg-muted rounded-lg flex items-center justify-center p-12">
+                <div className="relative aspect-square bg-muted rounded-lg flex items-center justify-center p-12">
                     <div className="text-center">
                         <div className="text-9xl font-bold text-primary mb-4">
                             {specs.aro}"
@@ -51,6 +51,10 @@ export function ProdutoDetalhes({ produto }: ProdutoDetalhesProps) {
                             {specs.largura}/{specs.perfil}R{specs.aro}
                         </div>
                     </div>
+                    {/* Aviso discreto */}
+                    <span className="absolute bottom-3 left-3 text-[11px] text-muted-foreground/50">
+                        *Imagem ilustrativa
+                    </span>
                 </div>
             </div>
 

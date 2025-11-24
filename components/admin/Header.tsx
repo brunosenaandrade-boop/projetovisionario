@@ -19,9 +19,9 @@ interface HeaderProps {
 
 export function Header({ user }: HeaderProps) {
     return (
-        <header className="bg-white border-b h-16 flex items-center justify-between px-6">
+        <header className="bg-background border-b h-16 flex items-center justify-between px-6">
             <div className="flex items-center gap-4">
-                <h2 className="text-lg font-semibold text-gray-800">Painel Administrativo</h2>
+                <h2 className="text-lg font-semibold text-foreground">Painel Administrativo</h2>
             </div>
 
             <div className="flex items-center gap-4">

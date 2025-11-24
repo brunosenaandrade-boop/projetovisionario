@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import {
   LayoutDashboard,
   Package,
+  ShoppingBag,
   Calendar,
   MessageSquare,
   Settings,
@@ -14,6 +15,7 @@ import {
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Produtos', href: '/dashboard/produtos', icon: ShoppingBag },
   { name: 'Pedidos', href: '/dashboard/pedidos', icon: Package },
   { name: 'Agendamentos', href: '/dashboard/agendamentos', icon: Calendar },
   { name: 'WhatsApp', href: '/dashboard/whatsapp', icon: MessageSquare },
