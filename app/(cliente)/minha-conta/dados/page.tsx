@@ -14,6 +14,8 @@ interface DadosCliente {
   telefone: string | null
   email: string | null
   cpf: string | null
+  totalCompras?: number
+  pontos?: number
 }
 
 export default function MeusDadosPage() {
