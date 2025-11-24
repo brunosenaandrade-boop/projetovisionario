@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { redirect } from 'next/navigation'
 import { getClienteLogado } from '@/lib/cliente/auth'
 import { ClienteAreaSidebar } from '@/components/cliente/ClienteAreaSidebar'
