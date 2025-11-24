@@ -13,7 +13,7 @@ export default async function PerfilPage() {
     }
 
     const usuario = await db.usuario.findUnique({
-        where: { id: session.id },
+        where: { id: session.userId },
         select: {
             id: true,
             nome: true,

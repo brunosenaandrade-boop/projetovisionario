@@ -22,7 +22,7 @@ export async function PUT(req: NextRequest) {
         const emailExiste = await db.usuario.findFirst({
             where: {
                 email,
-                NOT: { id: session.id },
+                NOT: { id: session.userId },
             },
         })
 
@@ -31,7 +31,7 @@ export async function PUT(req: NextRequest) {
         }
 
         const usuario = await db.usuario.update({
-            where: { id: session.id },
+            where: { id: session.userId },
             data: { nome, email },
         })
 

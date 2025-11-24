@@ -25,7 +25,7 @@ export async function PUT(req: NextRequest) {
 
         // Buscar usuário com senha
         const usuario = await db.usuario.findUnique({
-            where: { id: session.id },
+            where: { id: session.userId },
         })
 
         if (!usuario) {
@@ -33,7 +33,7 @@ export async function PUT(req: NextRequest) {
         }
 
         // Verificar senha atual
-        const senhaValida = await bcrypt.compare(senhaAtual, usuario.senha)
+        const senhaValida = await bcrypt.compare(senhaAtual, usuario.senhaHash)
 
         if (!senhaValida) {
             return NextResponse.json({ error: 'Senha atual incorreta' }, { status: 400 })
@@ -44,8 +44,8 @@ export async function PUT(req: NextRequest) {
 
         // Atualizar senha
         await db.usuario.update({
-            where: { id: session.id },
-            data: { senha: novaSenhaHash },
+            where: { id: session.userId },
+            data: { senhaHash: novaSenhaHash },
         })
 
         return NextResponse.json({ success: true, message: 'Senha alterada com sucesso' })
