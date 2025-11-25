@@ -19,6 +19,7 @@ interface HeaderProps {
         nome: string
         email: string
         role: string
+        permissoes: Record<string, boolean>
     }
 }
 

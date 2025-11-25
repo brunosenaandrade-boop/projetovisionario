@@ -13,17 +13,31 @@ import {
   LogOut,
 } from 'lucide-react'
 
-const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Produtos', href: '/dashboard/produtos', icon: ShoppingBag },
-  { name: 'Pedidos', href: '/dashboard/pedidos', icon: Package },
-  { name: 'Agendamentos', href: '/dashboard/agendamentos', icon: Calendar },
-  { name: 'WhatsApp', href: '/dashboard/whatsapp', icon: MessageSquare },
-  { name: 'Configuracoes', href: '/dashboard/configuracoes', icon: Settings },
+interface NavigationItem {
+  name: string
+  href: string
+  icon: any
+  permission: string // Chave da permissão no objeto permissoes
+}
+
+const allNavigation: NavigationItem[] = [
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, permission: 'dashboard' },
+  { name: 'Produtos', href: '/dashboard/produtos', icon: ShoppingBag, permission: 'produtos' },
+  { name: 'Pedidos', href: '/dashboard/pedidos', icon: Package, permission: 'pedidos' },
+  { name: 'Agendamentos', href: '/dashboard/agendamentos', icon: Calendar, permission: 'agendamentos' },
+  { name: 'WhatsApp', href: '/dashboard/whatsapp', icon: MessageSquare, permission: 'whatsapp' },
+  { name: 'Configuracoes', href: '/dashboard/configuracoes', icon: Settings, permission: 'configuracoes' },
 ]
 
-export function Sidebar() {
+interface SidebarProps {
+  permissoes: Record<string, boolean>
+}
+
+export function Sidebar({ permissoes }: SidebarProps) {
   const pathname = usePathname()
+
+  // Filtrar navegação baseado nas permissões do usuário
+  const navigation = allNavigation.filter(item => permissoes[item.permission] === true)
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' })
