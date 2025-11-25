@@ -12,7 +12,10 @@ import {
     CheckCircle2,
     XCircle,
     PlayCircle,
-    AlertCircle
+    AlertCircle,
+    Eye,
+    Edit,
+    Ban
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -24,7 +27,15 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
+    DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
 
 interface AgendamentosClientProps {
@@ -32,7 +43,10 @@ interface AgendamentosClientProps {
 }
 
 export function AgendamentosClient({ initialAgendamentos }: AgendamentosClientProps) {
+    const router = useRouter()
     const [agendamentos] = useState(initialAgendamentos)
+    const [detalhesAberto, setDetalhesAberto] = useState(false)
+    const [agendamentoSelecionado, setAgendamentoSelecionado] = useState<any>(null)
 
     // Agrupar por data
     const groupedAgendamentos: Record<string, any[]> = agendamentos.reduce((acc: Record<string, any[]>, ag) => {
@@ -123,26 +137,26 @@ export function AgendamentosClient({ initialAgendamentos }: AgendamentosClientPr
                                                         </div>
 
                                                         {/* Details Grid */}
-                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-sm text-muted-foreground">
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-sm">
                                                             {ag.cliente.veiculoMarca && (
                                                                 <div className="flex items-center gap-2">
-                                                                    <Car className="h-4 w-4 text-gray-400" />
-                                                                    <span>
+                                                                    <Car className="h-4 w-4 text-primary/70" />
+                                                                    <span className="text-foreground">
                                                                         {ag.cliente.veiculoMarca} {ag.cliente.veiculoModelo}
-                                                                        {ag.cliente.veiculoPlaca && <span className="text-xs bg-muted px-1.5 py-0.5 rounded ml-2 font-mono">{ag.cliente.veiculoPlaca}</span>}
+                                                                        {ag.cliente.veiculoPlaca && <span className="text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded ml-2 font-mono">{ag.cliente.veiculoPlaca}</span>}
                                                                     </span>
                                                                 </div>
                                                             )}
                                                             {ag.cliente.telefone && (
                                                                 <div className="flex items-center gap-2">
-                                                                    <User className="h-4 w-4 text-gray-400" />
-                                                                    <span>{ag.cliente.telefone}</span>
+                                                                    <User className="h-4 w-4 text-primary/70" />
+                                                                    <span className="text-foreground">{ag.cliente.telefone}</span>
                                                                 </div>
                                                             )}
                                                             {ag.pedido && (
                                                                 <div className="flex items-center gap-2 col-span-full mt-1 pt-2 border-t border-dashed">
-                                                                    <span className="font-medium text-gray-700 dark:text-gray-300">Serviço:</span>
-                                                                    <span>Pedido #{ag.pedido.numero}</span>
+                                                                    <span className="font-medium text-foreground">Serviço:</span>
+                                                                    <span className="text-foreground">Pedido #{ag.pedido.numero}</span>
                                                                 </div>
                                                             )}
                                                         </div>
@@ -157,9 +171,32 @@ export function AgendamentosClient({ initialAgendamentos }: AgendamentosClientPr
                                                                 </Button>
                                                             </DropdownMenuTrigger>
                                                             <DropdownMenuContent align="end">
-                                                                <DropdownMenuItem>Ver Detalhes</DropdownMenuItem>
-                                                                <DropdownMenuItem>Editar</DropdownMenuItem>
-                                                                <DropdownMenuItem className="text-red-600">Cancelar</DropdownMenuItem>
+                                                                <DropdownMenuItem onClick={() => {
+                                                                    setAgendamentoSelecionado(ag)
+                                                                    setDetalhesAberto(true)
+                                                                }}>
+                                                                    <Eye className="h-4 w-4 mr-2" />
+                                                                    Ver Detalhes
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuItem onClick={() => {
+                                                                    router.push(`/dashboard/agendamentos/${ag.id}/editar`)
+                                                                }}>
+                                                                    <Edit className="h-4 w-4 mr-2" />
+                                                                    Editar
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuSeparator />
+                                                                <DropdownMenuItem
+                                                                    className="text-red-600 focus:text-red-600"
+                                                                    onClick={() => {
+                                                                        if (confirm('Tem certeza que deseja cancelar este agendamento?')) {
+                                                                            // TODO: Implementar cancelamento
+                                                                            console.log('Cancelar', ag.id)
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    <Ban className="h-4 w-4 mr-2" />
+                                                                    Cancelar
+                                                                </DropdownMenuItem>
                                                             </DropdownMenuContent>
                                                         </DropdownMenu>
                                                     </div>
@@ -173,6 +210,113 @@ export function AgendamentosClient({ initialAgendamentos }: AgendamentosClientPr
                     </div>
                 )})
             )}
+
+            {/* Dialog de Detalhes */}
+            <Dialog open={detalhesAberto} onOpenChange={setDetalhesAberto}>
+                <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>Detalhes do Agendamento</DialogTitle>
+                        <DialogDescription>
+                            Informações completas sobre o agendamento
+                        </DialogDescription>
+                    </DialogHeader>
+                    {agendamentoSelecionado && (
+                        <div className="space-y-6">
+                            {/* Cliente */}
+                            <div>
+                                <h4 className="font-semibold text-sm text-muted-foreground mb-3">Cliente</h4>
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2">
+                                        <User className="h-4 w-4 text-primary/70" />
+                                        <span className="font-medium">{agendamentoSelecionado.cliente.nome}</span>
+                                    </div>
+                                    {agendamentoSelecionado.cliente.telefone && (
+                                        <div className="flex items-center gap-2 text-sm">
+                                            <span className="text-muted-foreground">Telefone:</span>
+                                            <span>{agendamentoSelecionado.cliente.telefone}</span>
+                                        </div>
+                                    )}
+                                    {agendamentoSelecionado.cliente.email && (
+                                        <div className="flex items-center gap-2 text-sm">
+                                            <span className="text-muted-foreground">Email:</span>
+                                            <span>{agendamentoSelecionado.cliente.email}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Veículo */}
+                            {agendamentoSelecionado.cliente.veiculoMarca && (
+                                <div>
+                                    <h4 className="font-semibold text-sm text-muted-foreground mb-3">Veículo</h4>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-2">
+                                            <Car className="h-4 w-4 text-primary/70" />
+                                            <span>{agendamentoSelecionado.cliente.veiculoMarca} {agendamentoSelecionado.cliente.veiculoModelo}</span>
+                                        </div>
+                                        {agendamentoSelecionado.cliente.veiculoPlaca && (
+                                            <div className="flex items-center gap-2 text-sm">
+                                                <span className="text-muted-foreground">Placa:</span>
+                                                <span className="font-mono bg-primary/10 text-primary px-2 py-1 rounded">{agendamentoSelecionado.cliente.veiculoPlaca}</span>
+                                            </div>
+                                        )}
+                                        {agendamentoSelecionado.cliente.veiculoAno && (
+                                            <div className="flex items-center gap-2 text-sm">
+                                                <span className="text-muted-foreground">Ano:</span>
+                                                <span>{agendamentoSelecionado.cliente.veiculoAno}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Data e Hora */}
+                            <div>
+                                <h4 className="font-semibold text-sm text-muted-foreground mb-3">Agendamento</h4>
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2">
+                                        <CalendarIcon className="h-4 w-4 text-primary/70" />
+                                        <span>{format(new Date(agendamentoSelecionado.data), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Clock className="h-4 w-4 text-primary/70" />
+                                        <span>
+                                            {agendamentoSelecionado.hora instanceof Date
+                                                ? format(agendamentoSelecionado.hora, 'HH:mm')
+                                                : typeof agendamentoSelecionado.hora === 'string'
+                                                    ? agendamentoSelecionado.hora.substring(0, 5)
+                                                    : format(new Date(agendamentoSelecionado.hora), 'HH:mm')}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Pedido */}
+                            {agendamentoSelecionado.pedido && (
+                                <div>
+                                    <h4 className="font-semibold text-sm text-muted-foreground mb-3">Pedido</h4>
+                                    <div className="space-y-2">
+                                        <div className="text-sm">
+                                            <span className="text-muted-foreground">Número:</span>
+                                            <span className="ml-2 font-medium">#{agendamentoSelecionado.pedido.numero}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Observações */}
+                            {agendamentoSelecionado.observacoes && (
+                                <div>
+                                    <h4 className="font-semibold text-sm text-muted-foreground mb-3">Observações</h4>
+                                    <p className="text-sm text-foreground bg-muted p-3 rounded-lg">
+                                        {agendamentoSelecionado.observacoes}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }
