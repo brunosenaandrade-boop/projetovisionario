@@ -10,36 +10,34 @@ export interface ItemCarrinho {
     specs: any
 }
 
-export interface ServicoCarrinho {
-    id: string
-    nome: string
-    preco: number
-    descricao: string
+// Configuração de Geometria
+export interface GeometriaConfig {
+    tipoVeiculo: 'popular' | 'moderno'
+    incluirCambagem: boolean
+    rodas: number // número de rodas para cambagem
 }
 
-// Serviços disponíveis para upsell
-export const SERVICOS_DISPONIVEIS: ServicoCarrinho[] = [
-    {
-        id: 'geometria',
-        nome: 'Geometria',
-        preco: 120,
-        descricao: 'Alinhamento completo das rodas'
-    },
-    {
-        id: 'balanceamento',
-        nome: 'Balanceamento',
-        preco: 80,
-        descricao: 'Balanceamento de todas as rodas'
-    }
-]
+// Configuração de Balanceamento
+export interface BalanceamentoConfig {
+    tipoAro: 'ferro' | 'liga'
+    rodas: number // número de rodas
+}
+
+// Serviço configurado no carrinho
+export interface ServicoConfigurado {
+    id: 'geometria' | 'balanceamento'
+    config: GeometriaConfig | BalanceamentoConfig
+    preco: number
+}
 
 interface CarrinhoStore {
     items: ItemCarrinho[]
-    servicos: string[] // IDs dos serviços selecionados
+    servicos: ServicoConfigurado[] // Serviços configurados
     adicionarItem: (item: Omit<ItemCarrinho, 'quantidade'>, quantidade?: number) => void
     removerItem: (id: string) => void
     atualizarQuantidade: (id: string, quantidade: number) => void
-    toggleServico: (servicoId: string) => void
+    adicionarServico: (servico: ServicoConfigurado) => void
+    removerServico: (servicoId: string) => void
     limparCarrinho: () => void
     getTotalItems: () => number
     getSubtotal: () => number
@@ -47,6 +45,35 @@ interface CarrinhoStore {
     getTotal: () => number
 }
 
+// Função para calcular preço da geometria
+export function calcularPrecoGeometria(config: GeometriaConfig): number {
+    let preco = config.tipoVeiculo === 'popular' ? 60 : 80
+    if (config.incluirCambagem) {
+        preco += config.rodas * 50
+    }
+    return preco
+}
+
+// Função para calcular preço do balanceamento
+export function calcularPrecoBalanceamento(config: BalanceamentoConfig): number {
+    const precoPorRoda = config.tipoAro === 'ferro' ? 15 : 20
+    return config.rodas * precoPorRoda
+}
+
+// Função para gerar descrição da geometria
+export function gerarDescricaoGeometria(config: GeometriaConfig): string {
+    const tipo = config.tipoVeiculo === 'popular' ? 'Carro Popular' : 'Carro Moderno'
+    if (config.incluirCambagem) {
+        return `Geometria ${tipo} + Cambagem (${config.rodas} ${config.rodas === 1 ? 'roda' : 'rodas'})`
+    }
+    return `Geometria ${tipo}`
+}
+
+// Função para gerar descrição do balanceamento
+export function gerarDescricaoBalanceamento(config: BalanceamentoConfig): string {
+    const tipo = config.tipoAro === 'ferro' ? 'Aro de Ferro' : 'Aro de Liga'
+    return `Balanceamento ${tipo} (${config.rodas} ${config.rodas === 1 ? 'roda' : 'rodas'})`
+}
 
 export const useCarrinhoStore = create<CarrinhoStore>()(
     persist(
@@ -93,18 +120,20 @@ export const useCarrinhoStore = create<CarrinhoStore>()(
                 }))
             },
 
-            toggleServico: (servicoId) => {
+            adicionarServico: (servico) => {
                 set((state) => {
-                    const existe = state.servicos.includes(servicoId)
-                    if (existe) {
-                        return {
-                            servicos: state.servicos.filter((id) => id !== servicoId),
-                        }
-                    }
+                    // Remove serviço existente do mesmo tipo
+                    const servicosFiltrados = state.servicos.filter((s) => s.id !== servico.id)
                     return {
-                        servicos: [...state.servicos, servicoId],
+                        servicos: [...servicosFiltrados, servico],
                     }
                 })
+            },
+
+            removerServico: (servicoId) => {
+                set((state) => ({
+                    servicos: state.servicos.filter((s) => s.id !== servicoId),
+                }))
             },
 
             limparCarrinho: () => {
@@ -123,10 +152,7 @@ export const useCarrinhoStore = create<CarrinhoStore>()(
             },
 
             getTotalServicos: () => {
-                const servicosSelecionados = get().servicos
-                return SERVICOS_DISPONIVEIS
-                    .filter((s) => servicosSelecionados.includes(s.id))
-                    .reduce((total, s) => total + s.preco, 0)
+                return get().servicos.reduce((total, s) => total + s.preco, 0)
             },
 
             getTotal: () => {
