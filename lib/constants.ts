@@ -1,7 +1,14 @@
 export const LOJA_SLUG = 'nenem-pneus'
 
+// Nome para uso em branding/logo (visual, moderno)
+export const LOJA_NOME_DISPLAY = 'NenemPneus.com'
+
+// Nome para uso em comunicações (emails, mensagens - mais legível)
+export const LOJA_NOME_COMPLETO = 'Nenem Pneus.com'
+
 export const LOJA_INFO = {
-    nome: 'Neném Pneus',
+    nome: 'Nenem Pneus.com',
+    nomeDisplay: 'NenemPneus.com',
     razaoSocial: 'HANDERSON FRANCISCO LTDA',
     cnpj: '36.985.207/0001-00',
     telefone: '(48) 9997-3889',

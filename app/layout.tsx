@@ -5,7 +5,7 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Neném Pneus - Pneus Seminovos de Qualidade',
+  title: 'NenemPneus.com - Pneus Seminovos de Qualidade',
   description: 'Pneus seminovos com até 50% de desconto. Garantia e segurança.',
 }
 

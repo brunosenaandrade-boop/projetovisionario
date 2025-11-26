@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Phone } from 'lucide-react'
-import { LOJA_INFO, NAVEGACAO } from '@/lib/constants'
+import { LOJA_INFO, LOJA_NOME_DISPLAY, NAVEGACAO } from '@/lib/constants'
 import { CarrinhoSheet } from './CarrinhoSheet'
 
 export function Header() {
@@ -27,8 +27,10 @@ export function Header() {
                 <div className="flex items-center justify-between">
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-2">
-                        <div className="text-2xl font-bold text-primary">
-                            Neném <span className="text-foreground">Pneus</span>
+                        <div className="text-2xl font-bold">
+                            <span className="text-primary">Nenem</span>
+                            <span className="text-foreground">Pneus</span>
+                            <span className="text-primary">.com</span>
                         </div>
                     </Link>
 
