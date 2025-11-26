@@ -49,7 +49,7 @@ export const produtoImportSchema = z.object({
     .transform(val => DOMPurify.sanitize(val.trim().toLowerCase())),
 
   status: z.enum(['ativo', 'inativo'], {
-    errorMap: () => ({ message: 'Status inválido. Use: ativo ou inativo' })
+    message: 'Status inválido. Use: ativo ou inativo'
   }).default('ativo'),
 
   descricao: z.string()
