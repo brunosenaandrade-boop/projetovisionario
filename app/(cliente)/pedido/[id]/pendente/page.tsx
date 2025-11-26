@@ -1,16 +1,65 @@
 'use client'
 
+import { useState, useEffect } from 'react'
+import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Clock, AlertCircle, Copy } from 'lucide-react'
+import { Clock, AlertCircle, Copy, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function PedidoPendentePage() {
+    const params = useParams()
+    const [pedido, setPedido] = useState<any>(null)
+    const [loading, setLoading] = useState(true)
+    const [pixCode, setPixCode] = useState<string | null>(null)
+
+    useEffect(() => {
+        async function fetchPedido() {
+            try {
+                const response = await fetch(`/api/pedidos/${params.id}`)
+                if (response.ok) {
+                    const data = await response.json()
+                    setPedido(data.pedido)
+
+                    // Buscar código PIX se houver pagamento pendente
+                    const pagamentoPendente = data.pedido.pagamentos?.find(
+                        (p: any) => p.status === 'pending' && p.metodo === 'pix'
+                    )
+
+                    if (pagamentoPendente?.pixCode) {
+                        setPixCode(pagamentoPendente.pixCode)
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao buscar pedido:', error)
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        if (params.id) {
+            fetchPedido()
+        }
+    }, [params.id])
+
     const copiarPix = () => {
-        // Aqui seria o código PIX real
-        navigator.clipboard.writeText('00020126330014BR.GOV.BCB.PIX...')
-        toast.success('Código PIX copiado!')
+        if (pixCode) {
+            navigator.clipboard.writeText(pixCode)
+            toast.success('Código PIX copiado!')
+        } else {
+            toast.info('Aguarde a geração do código PIX...')
+        }
+    }
+
+    if (loading) {
+        return (
+            <div className="container mx-auto px-4 py-12">
+                <div className="flex items-center justify-center">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+            </div>
+        )
     }
 
     return (
@@ -39,14 +88,24 @@ export default function PedidoPendentePage() {
                         </p>
                         <div className="bg-white p-4 rounded-lg border border-yellow-200">
                             <p className="text-xs text-muted-foreground mb-2">Código PIX:</p>
-                            <div className="flex gap-2">
-                                <code className="flex-1 text-sm bg-gray-50 p-2 rounded border overflow-x-auto">
-                                    00020126330014BR.GOV.BCB.PIX...
-                                </code>
-                                <Button size="sm" onClick={copiarPix}>
-                                    <Copy className="h-4 w-4" />
-                                </Button>
-                            </div>
+                            {pixCode ? (
+                                <div className="flex gap-2">
+                                    <code className="flex-1 text-sm bg-gray-50 p-2 rounded border overflow-x-auto">
+                                        {pixCode}
+                                    </code>
+                                    <Button size="sm" onClick={copiarPix}>
+                                        <Copy className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="text-sm text-muted-foreground bg-gray-50 p-4 rounded border">
+                                    <p className="mb-2">Código PIX em processamento...</p>
+                                    <p className="text-xs">
+                                        Se você escolheu PIX no Mercado Pago, o código será exibido na próxima tela.
+                                        Caso contrário, você pode finalizar o pagamento diretamente no Mercado Pago.
+                                    </p>
+                                </div>
+                            )}
                         </div>
                         <p className="text-xs text-yellow-700 mt-4">
                             Após a confirmação do pagamento, você receberá um e-mail e WhatsApp com os detalhes do seu pedido.

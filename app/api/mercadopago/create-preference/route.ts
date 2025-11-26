@@ -2,6 +2,8 @@ export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
 import { mercadoPagoPreference } from '@/lib/mercadopago'
+import { db } from '@/lib/db'
+import { gerarDescricaoGeometria, gerarDescricaoBalanceamento } from '@/lib/store/carrinho-store'
 
 export async function POST(req: NextRequest) {
     try {
@@ -13,16 +15,35 @@ export async function POST(req: NextRequest) {
             )
         }
         const body = await req.json()
-        const { pedidoId, items, total } = body
+        const { pedidoId, items, servicos = [], total } = body
+
+        // Criar array de items incluindo pneus e serviços
+        const mpItems = [
+            // Pneus
+            ...items.map((item: any) => ({
+                id: item.id,
+                title: item.nome,
+                quantity: item.quantidade,
+                unit_price: item.preco,
+            })),
+            // Serviços adicionais
+            ...servicos.map((servico: any) => {
+                const descricao = servico.id === 'geometria'
+                    ? gerarDescricaoGeometria(servico.config)
+                    : gerarDescricaoBalanceamento(servico.config)
+
+                return {
+                    id: servico.id,
+                    title: descricao,
+                    quantity: 1,
+                    unit_price: servico.preco,
+                }
+            }),
+        ]
 
         const preference = await mercadoPagoPreference.create({
             body: {
-                items: items.map((item: any) => ({
-                    id: item.id,
-                    title: item.nome,
-                    quantity: item.quantidade,
-                    unit_price: item.preco,
-                })),
+                items: mpItems,
                 back_urls: {
                     success: `${process.env.NEXT_PUBLIC_BASE_URL}/pedido/${pedidoId}/sucesso`,
                     failure: `${process.env.NEXT_PUBLIC_BASE_URL}/pedido/${pedidoId}/falha`,
@@ -32,6 +53,18 @@ export async function POST(req: NextRequest) {
                 notification_url: `${process.env.NEXT_PUBLIC_BASE_URL}/api/webhooks/mercadopago`,
                 external_reference: pedidoId,
                 statement_descriptor: 'NENEM PNEUS',
+            },
+        })
+
+        // Salvar preference no banco de dados
+        await db.pagamento.create({
+            data: {
+                pedido: { connect: { numero: pedidoId } },
+                gateway: 'mercadopago',
+                metodo: 'preference',
+                status: 'pending',
+                valor: total,
+                mpPreferenceId: preference.id,
             },
         })
 

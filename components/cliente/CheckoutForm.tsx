@@ -56,7 +56,7 @@ const formatarPlaca = (value: string) => {
 
 export function CheckoutForm() {
     const router = useRouter()
-    const { items, getSubtotal, limparCarrinho } = useCarrinhoStore()
+    const { items, servicos, getSubtotal, getTotalServicos, getTotal, limparCarrinho } = useCarrinhoStore()
     const [loading, setLoading] = useState(false)
     const [agendamento, setAgendamento] = useState<{ data: string; hora: string } | null>(null)
 
@@ -80,13 +80,15 @@ export function CheckoutForm() {
             }
 
             const subtotal = getSubtotal()
+            const totalServicos = getTotalServicos()
+            const total = getTotal()
 
             // 1. Criar pedido
             const resultado = await criarPedido({
                 cliente: data,
                 items,
                 subtotal,
-                total: subtotal,
+                total,
                 observacoes: data.observacoes,
             })
 
@@ -120,7 +122,8 @@ export function CheckoutForm() {
                 body: JSON.stringify({
                     pedidoId: resultado.pedido.numero,
                     items,
-                    total: subtotal,
+                    servicos,
+                    total,
                 }),
             })
 
