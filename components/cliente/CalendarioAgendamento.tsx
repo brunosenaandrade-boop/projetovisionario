@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { SeletorHorario } from './SeletorHorario'
@@ -18,6 +18,7 @@ export function CalendarioAgendamento({ onSelecionarDataHora }: CalendarioAgenda
     const [horarioSelecionado, setHorarioSelecionado] = useState<string | null>(null)
     const [slots, setSlots] = useState<any[]>([])
     const [loading, setLoading] = useState(false)
+    const horariosSectionRef = useRef<HTMLDivElement>(null)
 
     // Gerar dias da semana
     const diasSemana = Array.from({ length: 7 }, (_, i) => addDays(semanaAtual, i))
@@ -38,6 +39,13 @@ export function CalendarioAgendamento({ onSelecionarDataHora }: CalendarioAgenda
             const result = await response.json()
             if (result.success) {
                 setSlots(result.slots)
+                // Scroll suave para os horários após carregar
+                setTimeout(() => {
+                    horariosSectionRef.current?.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'nearest'
+                    })
+                }, 100)
             }
         } catch (error) {
             console.error('Erro ao carregar slots:', error)
@@ -116,7 +124,7 @@ export function CalendarioAgendamento({ onSelecionarDataHora }: CalendarioAgenda
 
                 {/* Horários */}
                 {dataSelecionada && (
-                    <div className="border-t pt-6">
+                    <div ref={horariosSectionRef} className="border-t pt-6">
                         {loading ? (
                             <p className="text-sm text-muted-foreground text-center py-4">
                                 Carregando horários...

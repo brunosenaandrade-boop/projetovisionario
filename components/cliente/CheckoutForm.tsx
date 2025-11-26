@@ -205,7 +205,10 @@ export function CheckoutForm() {
             {/* Endereço */}
             <Card>
                 <CardHeader>
-                    <CardTitle>Endereço de Entrega</CardTitle>
+                    <CardTitle>Dados de Cadastro</CardTitle>
+                    <p className="text-sm text-muted-foreground mt-2">
+                        A instalação será realizada em nossa loja no dia e horário agendados
+                    </p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

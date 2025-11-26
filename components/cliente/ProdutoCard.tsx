@@ -2,13 +2,15 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { formatPrice } from '@/lib/utils'
-import { ShoppingCart, Check } from 'lucide-react'
+import { ShoppingCart, Check, Zap } from 'lucide-react'
 import { useState } from 'react'
 import { useCarrinhoStore } from '@/lib/store/carrinho-store'
+import { toast } from 'sonner'
 
 interface ProdutoCardProps {
     id: string
@@ -21,9 +23,30 @@ interface ProdutoCardProps {
 }
 
 export function ProdutoCard({ id, nome, slug, preco, estoque, specs, imagemUrl }: ProdutoCardProps) {
+    const router = useRouter()
     const [isHovered, setIsHovered] = useState(false)
     const [adicionado, setAdicionado] = useState(false)
     const adicionarItem = useCarrinhoStore((state) => state.adicionarItem)
+
+    const handleAdicionarCarrinho = (e: React.MouseEvent) => {
+        e.preventDefault()
+        adicionarItem({ id, nome, slug, preco, specs })
+        setAdicionado(true)
+        toast.success('Produto adicionado ao carrinho!', {
+            description: nome,
+            action: {
+                label: 'Ver Carrinho',
+                onClick: () => router.push('/carrinho')
+            }
+        })
+        setTimeout(() => setAdicionado(false), 2000)
+    }
+
+    const handleComprarAgora = (e: React.MouseEvent) => {
+        e.preventDefault()
+        adicionarItem({ id, nome, slug, preco, specs })
+        router.push('/carrinho')
+    }
 
     return (
         <Card
@@ -104,39 +127,50 @@ export function ProdutoCard({ id, nome, slug, preco, estoque, specs, imagemUrl }
                 </div>
             </CardContent>
 
-            <CardFooter className="p-4 pt-0 flex items-center justify-between">
-                <div>
-                    <div className="text-2xl font-bold text-primary transition-transform duration-300 group-hover:scale-110 inline-block">
-                        {formatPrice(preco)}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                        cada unidade
+            <CardFooter className="p-4 pt-0 flex flex-col gap-3">
+                <div className="w-full flex items-center justify-between">
+                    <div>
+                        <div className="text-2xl font-bold text-primary transition-transform duration-300 group-hover:scale-110 inline-block">
+                            {formatPrice(preco)}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                            cada unidade
+                        </div>
                     </div>
                 </div>
-                <Button
-                    size="sm"
-                    className="group/btn relative overflow-hidden hover:scale-105 transition-all duration-300 hover:shadow-lg hover:shadow-primary/50"
-                    onClick={(e) => {
-                        e.preventDefault()
-                        adicionarItem({ id, nome, slug, preco, specs })
-                        setAdicionado(true)
-                        setTimeout(() => setAdicionado(false), 2000)
-                    }}
-                    disabled={estoque <= 0}
-                >
-                    {adicionado ? (
-                        <>
-                            <Check className="h-4 w-4 mr-2" />
-                            <span className="relative z-10">Adicionado!</span>
-                        </>
-                    ) : (
-                        <>
-                            <ShoppingCart className="h-4 w-4 mr-2 group-hover/btn:rotate-12 transition-transform" />
-                            <span className="relative z-10">Adicionar</span>
-                        </>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 opacity-0 group-hover/btn:opacity-100 transition-opacity" />
-                </Button>
+
+                <div className="w-full flex gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 hover:scale-105 transition-all duration-300"
+                        onClick={handleAdicionarCarrinho}
+                        disabled={estoque <= 0}
+                    >
+                        {adicionado ? (
+                            <>
+                                <Check className="h-4 w-4 mr-2" />
+                                Adicionado!
+                            </>
+                        ) : (
+                            <>
+                                <ShoppingCart className="h-4 w-4 mr-2" />
+                                Adicionar
+                            </>
+                        )}
+                    </Button>
+
+                    <Button
+                        size="sm"
+                        className="flex-1 group/btn relative overflow-hidden hover:scale-105 transition-all duration-300 hover:shadow-lg hover:shadow-primary/50"
+                        onClick={handleComprarAgora}
+                        disabled={estoque <= 0}
+                    >
+                        <Zap className="h-4 w-4 mr-2 group-hover/btn:animate-pulse" />
+                        <span className="relative z-10">Comprar</span>
+                        <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 opacity-0 group-hover/btn:opacity-100 transition-opacity" />
+                    </Button>
+                </div>
             </CardFooter>
         </Card>
     )

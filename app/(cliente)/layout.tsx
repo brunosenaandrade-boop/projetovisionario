@@ -1,5 +1,6 @@
 import { Header } from '@/components/cliente/Header'
 import { Footer } from '@/components/cliente/Footer'
+import { Toaster } from 'sonner'
 
 export default function ClienteLayout({
     children,
@@ -11,6 +12,7 @@ export default function ClienteLayout({
             <Header />
             <main className="flex-1">{children}</main>
             <Footer />
+            <Toaster position="top-right" richColors />
         </div>
     )
 }
